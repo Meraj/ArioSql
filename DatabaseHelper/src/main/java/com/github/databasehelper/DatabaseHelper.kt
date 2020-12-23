@@ -7,31 +7,10 @@ import android.database.sqlite.SQLiteDatabase
 
 
 class DatabaseHelper(private val context: Context, private val DATABASE_NAME: String){
-
+    //
+    private var preparedStatements :MutableList<String> = ArrayList()
     // Query
-    private lateinit var QUERY :String
-    private fun getQueryBuilder(){
-        QUERY = "SELECT $SELECT "
-        QUERY += "FROM $TABLE_NAME "
-        if(SELECTION != null){
-           QUERY += "where $SELECTION "
-            if(SELECTION_ARG?.size!! > 1){
-                QUERY += "in $SELECTION_ARG"
-            }else{
-                val selection_arg = SELECTION_ARG!![0]
-                QUERY += "= $selection_arg"
-            }
-        }
-        if(LIMIT != 0){
-            QUERY += "LIMIT $LIMIT "
-        }
-        if(OFFSET != 0){
-            QUERY += "OFFSET $OFFSET "
-        }
-        if(OrderByColumnName != null){
-            QUERY += "ORDER BY $OrderByColumnName $ORDER "
-        }
-    }
+    private var QUERY :String = ""
     // Table
     private lateinit var TABLE_NAME :String
     fun table(TableName: String){
@@ -39,69 +18,81 @@ class DatabaseHelper(private val context: Context, private val DATABASE_NAME: St
 
     }
     // Select
-    private var SELECT = "*"
+    private var SELECT = "SELECT * "
     fun select(Select: Array<String>){
-        SELECT = ""
+        SELECT = "SELECT "
         Select.forEach {
             SELECT += "$it,"
         }
-        SELECT = SELECT.substring(0, SELECT.length - 1);
+        QUERY += SELECT.substring(0, SELECT.length - 1) + " "
     }
     fun select(Select: String){
-        SELECT = Select
+        QUERY += "SELECT $Select"
     }
     // Where
-    private var SELECTION: Array<String>? = null
-    private var SELECTION_ARG : Array<String>? = null
     fun where(Selection: String, SelectionArg: String){
-        SELECTION = arrayOf(Selection)
-        SELECTION_ARG = arrayOf(SelectionArg)
+        QUERY = "where $Selection = ?"
+        preparedStatements.add(SelectionArg)
     }
-    fun where(Selection: String, SelectionArg: Array<String>){
-        SELECTION = arrayOf(Selection)
-        SELECTION_ARG = SelectionArg
+    fun whereRange(Selection: String, from: String ,to:String,Between: Boolean = true){
+        if(Between){
+            QUERY = "where $Selection BETWEEN ? to ?"
+        }else{
+            QUERY = "where $Selection NOT BETWEEN ? to ?"
+        }
+        preparedStatements.add(from)
+        preparedStatements.add(to)
+    }
+    fun andWhere(Selection: String, SelectionArg: String){
+        QUERY += "AND $Selection = ?"
+        preparedStatements.add(SelectionArg)
+    }
+    fun orWhere(Selection: String, SelectionArg: String){
+        QUERY += "OR $Selection = ?"
+        preparedStatements.add(SelectionArg)
     }
     // Limit And Offset
-    private var LIMIT :Int = 0
-    private var OFFSET :Int = 0
-    fun limit(limitCount:Int, Offset: Int = 0){
-        LIMIT = limitCount
+
+    fun limit(Limit:Int, Offset: Int = 0){
+            QUERY += "LIMIT $Limit "
         if(Offset != 0){
-            OFFSET = Offset
+            QUERY += "OFFSET $Offset "
         }
-    }
+        }
+
     // OrderBy
     private var OrderByColumnName: String? = null
     private lateinit var ORDER:String
     fun orderBy(ColumnName: String,Order:String){
-        ORDER = Order
-        OrderByColumnName = ColumnName
+        QUERY += "ORDER BY $OrderByColumnName $ORDER "
     }
     // First
     @SuppressLint("Recycle")
     fun first(): Cursor? {
-        getQueryBuilder()
         val db:SQLiteDatabase = context.openOrCreateDatabase(
             DATABASE_NAME,
             Context.MODE_PRIVATE,
             null
         )
-        val cursor = db.rawQuery(QUERY, null)
+        val cursor = db.rawQuery(QUERY, preparedStatements.toTypedArray())
         cursor.moveToFirst()
         db.close()
+        QUERY = ""
+        preparedStatements = ArrayList()
         return cursor
     }
     // Get
     fun get(): Cursor? {
-        getQueryBuilder()
         val db:SQLiteDatabase = context.openOrCreateDatabase(
                 DATABASE_NAME,
                 Context.MODE_PRIVATE,
                 null
         )
-        val cursor = db.rawQuery(QUERY, null)
+        val cursor = db.rawQuery(QUERY, preparedStatements.toTypedArray())
         cursor.moveToFirst()
         db.close()
+        QUERY = ""
+        preparedStatements = ArrayList()
         return cursor
     }
     // Insert
