@@ -16,6 +16,10 @@ class CreateDatabase(private val context: Context){
     private lateinit var db: SQLiteDatabase
     fun database(Name: String): CreateDatabase {
         DATABASE_NAME = Name
+        if (!DATABASE_NAME.endsWith(".db")){
+            DATABASE_NAME += ".db";
+        }
+        DATABASE_NAME = DATABASE_NAME.replace(" ", "_");
         return this
     }
     fun version(Version: Int): CreateDatabase {
