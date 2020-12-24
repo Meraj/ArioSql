@@ -15,7 +15,7 @@ allprojects {
 ##### step 2
 ```gradle
 dependencies {
-	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.25'
+	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.26'
              }
 ```
 
