@@ -96,20 +96,23 @@ select(Column Names Array)
 ```kotlin
 queryBuilder.where("contact_name","jafar").first() 
 ```
-where(Column Name String, Value String)
+where(Column Name String, Value String) \ \
 for AndWhere :
 ```kotlin
  queryBuilder.where("contact_name","jafar").where("contact_number","09120000000").first() 
  ```
+ \
  for OrWhere :
  ```kotlin
   queryBuilder.where("contact_name","jafar").orWhere("contact_name","maryam").first() 
 ```
+\
 for whereBetween:
  ```kotlin
  queryBuilder.whereBetween("id","0","2").first() // Where Between Query
  whereBetween(Column Name String ,From String ,To String)
  ```
+ \
  for whereNotBetween:
  ```kotlin:
          queryBuilder.whereNotBetween("id","0","2").first() // Where Not Between Query
@@ -125,8 +128,8 @@ for whereBetween:
  #### Limit
  ```kotlin
  queryBuilder.limit(2).get() // limit
- limit(Limit Count Int)
  ```
+  limit(Limit Count Int)        
  #### Count Rows 
  for counting rows you can use count() function
  ```kotlin
