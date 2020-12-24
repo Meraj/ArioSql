@@ -28,9 +28,9 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
             QUERY += Where
         }
         if(OrderByColumnName != ""){
-           QUERY += "ORDER BY $OrderByColumnName $ORDER "  
+           QUERY += "ORDER BY $OrderByColumnName $ORDER "
         }
-        
+
         if(LimitQuery != ""){
             QUERY = LimitQuery
         }
@@ -108,9 +108,7 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
     // First
     @SuppressLint("Recycle")
     fun first(): Cursor? {
-        if(QUERY == ""){
-            QUERY = "SELECT * FROM"
-        }
+        getQueryBuilder()
         val db:SQLiteDatabase = context.openOrCreateDatabase(
             DATABASE_NAME,
             Context.MODE_PRIVATE,
@@ -125,6 +123,7 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
     }
     // Get
     fun get(): Cursor? {
+        getQueryBuilder()
         val db:SQLiteDatabase = context.openOrCreateDatabase(
                 DATABASE_NAME,
                 Context.MODE_PRIVATE,
