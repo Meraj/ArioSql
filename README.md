@@ -115,7 +115,7 @@ for searching in database for a row ,and check if its exist or not ,you can use 
 ```
 
 ###### Queries :
-* [select](#-Select-Column/Columns)
+* [select](#Android-Database)
 * where
 * orWhere
 * whereBetween
