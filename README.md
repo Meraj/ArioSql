@@ -15,7 +15,7 @@ allprojects {
 ##### step 2
 ```gradle
 dependencies {
-	        	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.12'
+	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.25'
              }
 ```
 
@@ -57,6 +57,8 @@ bingo ,lets create some queries now
 * [order by](#order-by--sort)
 * [first](#retrieving-a-single-row) -> for get a single row (return Cursor)
 * [get](#get-all-rows-from-table) -> for get rows (return Cursor)
+* [update](#update) ->for update row/rows
+* [delete](#delete) -> for delete row/rows
 * [insert](#Insert) -> insert data
 * [count](#count-rows) -> count rows
 * [exists / doesntExist](#existdoesnt-exist) -> check if a row exists or not
@@ -95,8 +97,10 @@ select(Column Names Array)
 #### Use Where Query / Search in Table
 ```kotlin
 queryBuilder.where("contact_name","jafar").first() 
+queryBuilder.where("contact_name","LIKE,"%jafar%").first() 
 ```
 where(Column Name String, Value String) 
+where(Column Name String, Operator String, Value String) 
 
 for AndWhere :
 ```kotlin
@@ -146,6 +150,23 @@ for searching in database for a row ,and check if its exist or not ,you can use 
         queryBuilder.where("id","1").exists() // return true if exist
         queryBuilder.where("id","1").doesntExist() // return true if DOES NOT exist
 ```
+#### update 
+
+```kotlin
+ queryBuilder.where("id","1").update("contact_name","maryam") // return true if successfully updated
+  queryBuilder.where("id","1").update(arrayOf("contact_name","contact_number"),arrayOf("maryam","09330000000")) // return true if successfully updated
+```
+update(Column Name String, New Value String)
+update(Column Names Array, New Values Array)
+update function return true if row/rows successfully updated
+
+#### delete
+```kotlin
+ queryBuilder.where("id","1").delete() // return true if successfully deleted
+  queryBuilder.whereBetween("id","1","5").delete() // return true if successfully deleted
+```
+update function return true if row/rows successfully deleted
+
 #### Close
 for close the connection to the database :
 ```kotlin

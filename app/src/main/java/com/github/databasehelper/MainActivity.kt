@@ -4,8 +4,6 @@ import android.database.Cursor
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
-import com.github.androidquerybuilder.CreateDatabase
-import com.github.androidquerybuilder.QueryBuilder
 
 
 class MainActivity : AppCompatActivity() {
