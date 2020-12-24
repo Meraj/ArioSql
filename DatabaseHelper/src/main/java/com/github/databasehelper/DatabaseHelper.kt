@@ -6,35 +6,45 @@ import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 
 
-class DatabaseHelper(private val context: Context, private val DATABASE_NAME: String){
+class DatabaseHelper(private val context: Context, private var DATABASE_NAME: String){
+    init {
+        if (!DATABASE_NAME.endsWith(".db")){
+            DATABASE_NAME += ".db";
+        }
+        DATABASE_NAME = DATABASE_NAME.replace(" ", "_");
+    }
     //
     private var preparedStatements :MutableList<String> = ArrayList()
     // Query
     private var QUERY :String = ""
     // Table
     private lateinit var TABLE_NAME :String
-    fun table(TableName: String){
+    fun table(TableName: String): DatabaseHelper {
         TABLE_NAME = TableName
+        return this
 
     }
     // Select
     private var SELECT = "SELECT * "
-    fun select(Select: Array<String>){
+    fun select(Select: Array<String>): DatabaseHelper {
         SELECT = "SELECT "
         Select.forEach {
             SELECT += "$it,"
         }
         QUERY += SELECT.substring(0, SELECT.length - 1) + " "
+        return this
     }
-    fun select(Select: String){
+    fun select(Select: String): DatabaseHelper {
         QUERY += "SELECT $Select"
+        return this
     }
     // Where
-    fun where(Selection: String, SelectionArg: String){
+    fun where(Selection: String, SelectionArg: String): DatabaseHelper {
         QUERY = "where $Selection = ?"
         preparedStatements.add(SelectionArg)
+        return this
     }
-    fun whereRange(Selection: String, from: String ,to:String,Between: Boolean = true){
+    fun whereRange(Selection: String, from: String ,to:String,Between: Boolean = true): DatabaseHelper {
         if(Between){
             QUERY = "where $Selection BETWEEN ? to ?"
         }else{
@@ -42,29 +52,32 @@ class DatabaseHelper(private val context: Context, private val DATABASE_NAME: St
         }
         preparedStatements.add(from)
         preparedStatements.add(to)
+        return this
     }
-    fun andWhere(Selection: String, SelectionArg: String){
+    fun andWhere(Selection: String, SelectionArg: String): DatabaseHelper {
         QUERY += "AND $Selection = ?"
         preparedStatements.add(SelectionArg)
+        return this
     }
-    fun orWhere(Selection: String, SelectionArg: String){
+    fun orWhere(Selection: String, SelectionArg: String): DatabaseHelper {
         QUERY += "OR $Selection = ?"
         preparedStatements.add(SelectionArg)
+        return this
     }
     // Limit And Offset
-
-    fun limit(Limit:Int, Offset: Int = 0){
+    fun limit(Limit:Int, Offset: Int = 0): DatabaseHelper {
             QUERY += "LIMIT $Limit "
         if(Offset != 0){
             QUERY += "OFFSET $Offset "
         }
-        }
-
+        return this
+    }
     // OrderBy
     private var OrderByColumnName: String? = null
     private lateinit var ORDER:String
-    fun orderBy(ColumnName: String,Order:String){
+    fun orderBy(ColumnName: String,Order:String): DatabaseHelper {
         QUERY += "ORDER BY $OrderByColumnName $ORDER "
+        return this
     }
     // First
     @SuppressLint("Recycle")
