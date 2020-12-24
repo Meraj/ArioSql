@@ -55,11 +55,11 @@ bingo ,lets create some queries now
 * [where / orWhere / where Between / where Not Between](#use-where-query--search-in-table)
 * [limit](#limit)
 * [order by](#order-by--sort)
-* [first](#retrieving-a-single-row) // for get a single row (return Cursor)
-* [get](#get-all-rows-from-table) // for get rows (return Cursor)
-* [insert](#Insert) // insert data
-* [count](#count-rows) // count rows
-* [exists / doesntExist](#existdoesnt-exist) // check if a row exists or not
+* [first](#retrieving-a-single-row) -> for get a single row (return Cursor)
+* [get](#get-all-rows-from-table) -> for get rows (return Cursor)
+* [insert](#Insert) -> insert data
+* [count](#count-rows) -> count rows
+* [exists / doesntExist](#existdoesnt-exist) -> check if a row exists or not
 
 
 #### Insert
