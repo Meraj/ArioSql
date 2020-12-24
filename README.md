@@ -21,7 +21,7 @@ dependencies {
 ```
 
 ## how use it ?
-### Create Database
+## Create Database
 for creating a database simply use CreateDatabase Class in your MainActivity, see below :
 ```kotlin
         val database = CreateDatabase(applicationContext)
@@ -38,10 +38,10 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
                 .init() // initialize Database
 ```
 
-### Build Queries
+## Build Queries
 you can use this library to create and run database queries in fluent way
 
-#### database Queries
+### database Queries
 first of all lets initilize DatabaseHelper Class 
 ```kotlin
    val dbHelper = DatabaseHelper(applicationContext,"myNewDatabase") // Load Database  
@@ -51,25 +51,25 @@ after that we need to set table name that we are going to run queries for it
     dbHelper.table("table_one") // Set Table   
 ```
 bingo ,lets create some queries now 
-##### get All Rows From Table
+#### get All Rows From Table
 get function let you to retrieve the results of the query :
 ```kotlin
     dbHelper.get() // get All Rows
 ```
 get() return Cursor
 
-##### Retrieving A Single Row
+#### Retrieving A Single Row
 first() function let you to retrieve the first index of the table :
 ```kotlin
     dbHelper.first() // get All Rows
 ```
 first() return Cursor
-##### Select Column/Columns
+#### Select Column/Columns
 ```kotlin
  dbHelper.select("contact_name").first() // select single column 
  dbHelper.select(arrayOf("contact_name","contact_number")).first()  // Select multiple Columns
 ```
-##### Use Where Query / Search in Table
+#### Use Where Query / Search in Table
 ```kotlin
     dbHelper.where("contact_name","jafar").first() 
 ```
@@ -89,17 +89,17 @@ for whereBetween:
  ```kotlin:
          dbHelper.whereNotBetween("id","0","2").first() // Where Not Between Query
  ```
- ##### Order By / Sort
+ #### Order By / Sort
  for ordering rows and then get data you can use :
  ```kotlin
          dbHelper.orderBy("id","ASC").first() // sort the result set based on id column in ASC order
 	 dbHelper.orderBy("id","DESC").first() // sort the result set based on id column in DESC order
  ```
- ##### Limit
+ #### Limit
  ```kotlin
  dbHelper.limit(2).get() // limit
  ```
- ##### Count Rows 
+ #### Count Rows 
  for counting rows you can use count() function
  ```kotlin
          dbHelper.count() // rows Count
