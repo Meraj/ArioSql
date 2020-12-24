@@ -16,7 +16,7 @@ allprojects {
 ##### step 2
 ```gradle
 dependencies {
-	        implementation 'com.github.MerajV:SqliteDatabaseHelperKotlin:-SNAPSHOT'
+	        implementation 'com.github.MerajV:AndroidDatabase:-SNAPSHOT'
 	}
 ```
 
