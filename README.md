@@ -88,8 +88,8 @@ queryBuilder.select("contact_name").first() // select single column
 
 queryBuilder.select(arrayOf("contact_name","contact_number")).first()  // Select multiple Columns
 ```
-select(Column Name String)
-or 
+select(Column Name String) \
+or \
 select(Column Names Array)
 
 #### Use Where Query / Search in Table
