@@ -41,7 +41,7 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
 you can use this library to create and run database queries in fluent way
 
 ### database Queries
-first of all lets initilize QueryBuilder Class 
+first of all lets initialize QueryBuilder Class 
 ```kotlin
    val queryBuilder = QueryBuilder(applicationContext,"myNewDatabase") // Load Database  
 ```
