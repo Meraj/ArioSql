@@ -45,7 +45,7 @@ for get data from database you can use DatabaseHelper Class, see below
    DatabaseHelper(applicationContext, // Context
   		  "myNewDatabase" // Database Name
 	 	 )
-        .table("testTbname") // Laod Table Name
+        .table("table_two") // Laod Table Name
 	.first()
 ```
 ###### Queries :
