@@ -1,7 +1,6 @@
-# Android Database
+# Android Query Builder
 this is a simple library that helps you to build databases and build queries in your java/kotlin project
 
-> Database Helper class is in progress
 ## install
 ##### step 1
 Add it in your root build.gradle at the end of repositories:
@@ -16,8 +15,8 @@ allprojects {
 ##### step 2
 ```gradle
 dependencies {
-	        implementation 'com.github.MerajV:AndroidDatabase:-SNAPSHOT'
-	}
+	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.1'
+                	}
 ```
 
 ## how use it ?
