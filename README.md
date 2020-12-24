@@ -1,7 +1,7 @@
 # SqliteDatabaseHelper
 this is a simple library that helps you to build databases and build queries in your java/kotlin project
 
-> this is a beta version
+> Database Helper class is in progress
 ## install
 ##### step 1
 Add it in your root build.gradle at the end of repositories:
