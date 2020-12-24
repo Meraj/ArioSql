@@ -62,7 +62,7 @@ bingo ,lets create some queries now
 * [insert](#Insert) -> insert data
 * [count](#count-rows) -> count rows
 * [exists / doesntExist](#existdoesnt-exist) -> check if a row exists or not
-* [paginate](#paginate) -> count rows
+* [paginate](#paginate) -> pagination
 
 
 #### Insert
