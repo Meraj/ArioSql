@@ -19,7 +19,7 @@ dependencies {
              }
 ```
 
-## how use it ?
+## how to use it ?
 ## Create Database
 for creating a database simply use CreateDatabase Class in your MainActivity, see below :
 ```kotlin
