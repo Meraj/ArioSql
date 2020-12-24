@@ -56,6 +56,6 @@ for get data from database you can use DatabaseHelper Class, see below
 * whereRange
 * limit
 * orderBy
-* first // for get a single row
-* get // for get rows
+	* first // for get a single row (return Cursor)
+* get // for get rows (return Cursor)
 * insert // insert data
