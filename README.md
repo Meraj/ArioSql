@@ -25,7 +25,7 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
 ```kotlin
         val database = CreateDatabase(applicationContext)
         database
-                .version(3) // Database Version (For Upgrading Database in future)
+                .version(1) // Database Version (For Upgrading Database in future)
                 .database("myNewDatabase") // Database Name
                 .table("table_one") // New Table
                    .column("id","INTEGER PRIMARY KEY AUTOINCREMENT") // table_one column
