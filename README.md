@@ -60,7 +60,7 @@ bingo ,lets create some queries now
 * [get](#get-all-rows-from-table) // for get rows (return Cursor)
 * [insert](#Insert) // insert data
 * [count](#count-rows) // count rows
-* [exists / doesntExist](existdoesnt-exist) // check if a row exists or not
+* [exists / doesntExist](#existdoesnt-exist) // check if a row exists or not
 
 
 #### Insert
