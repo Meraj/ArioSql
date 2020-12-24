@@ -97,7 +97,7 @@ select(Column Names Array)
 queryBuilder.where("contact_name","jafar").first() 
 ```
 where(Column Name String, Value String) \ 
-\
+
 for AndWhere :
 ```kotlin
  queryBuilder.where("contact_name","jafar").where("contact_number","09120000000").first() 
