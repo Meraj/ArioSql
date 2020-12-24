@@ -123,13 +123,17 @@ for whereBetween:
  	 queryBuilder.whereBetween("id","0","2").count() // Search in database and count
  ```
 count() function return Int
-## Exist/Doesn't exist
+#### Exist/Doesn't exist
 for searching in database for a row ,and check if its exist or not ,you can use :
 ```kotlin
         queryBuilder.where("id","1").exists() // return true if exist
         queryBuilder.where("id","1").doesntExist() // return true if DOES NOT exist
 ```
-
+#### Close
+for close the connection to the database :
+```kotlin
+queryBuilder.close()
+```
 
 ### Cursor in Android
 ```kotlin
