@@ -183,9 +183,12 @@ paginate.totalPages // Total Pages Int
 paginate.Rows // Cursor of indexes in current page
 paginate.currentPage // current page Int
 ```
-paginate(Results Per Page Int ,Current Page Int = 1)
-paginate method return Paginate class 
-
+paginate(Results Per Page Int ,Current Page Int = 1) \
+paginate method return Paginate class \
+for get page insert page number like below :
+```kotlin
+val paginate = queryBuilder.paginate(10,2) // paginate
+```
 ### Cursor in Android
 ```kotlin
 val cursor = queryBuilder.get()
