@@ -5,6 +5,12 @@ import android.database.sqlite.SQLiteDatabase
 
 
 class CreateDatabase(private val context: Context) {
+    //
+    companion object {
+        val PRIMARY_KEY = "INTEGER PRIMARY KEY AUTOINCREMENT"
+
+    }
+    //
     private lateinit var TABLE_NAME: String
     private lateinit var DATABASE_NAME: String
     private var DATABASE_VERSION: Int = 1
@@ -35,8 +41,8 @@ class CreateDatabase(private val context: Context) {
         return this
     }
 
-    fun column(Name: String, DInfo: String): CreateDatabase {
-        COLUMNS += "$Name $DInfo,"
+    fun column(Name: String, DataType: String): CreateDatabase {
+        COLUMNS += "$Name $DataType,"
         return this
     }
 
