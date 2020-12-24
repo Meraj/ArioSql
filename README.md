@@ -65,30 +65,38 @@ bingo ,lets create some queries now
 #### Insert
 for insert use :
 ```kotlin
-        queryBuilder.insert(arrayOf("contact_number","contact_name"), arrayOf("09120000000","Jafar")) // insert data
+queryBuilder.insert(arrayOf("contact_number","contact_name"), arrayOf("09120000000","Jafar")) // insert data
 ```
+insert(Array of column Names, Array of Values)
+
 #### get All Rows From Table
 get function let you to retrieve the results of the query :
 ```kotlin
-    queryBuilder.get() // get All Rows
+queryBuilder.get() // get All Rows
 ```
 get() return Cursor
 
 #### Retrieving A Single Row
 first() function let you to retrieve the first index of the table :
 ```kotlin
-    queryBuilder.first() // get All Rows
+queryBuilder.first() // get All Rows
 ```
 first() return Cursor
 #### Select Column/Columns
 ```kotlin
- queryBuilder.select("contact_name").first() // select single column 
- queryBuilder.select(arrayOf("contact_name","contact_number")).first()  // Select multiple Columns
+queryBuilder.select("contact_name").first() // select single column 
+
+queryBuilder.select(arrayOf("contact_name","contact_number")).first()  // Select multiple Columns
 ```
+select(Column Name String)
+or 
+select(Column Names Array)
+
 #### Use Where Query / Search in Table
 ```kotlin
-    queryBuilder.where("contact_name","jafar").first() 
+queryBuilder.where("contact_name","jafar").first() 
 ```
+where(Column Name String, Value String)
 for AndWhere :
 ```kotlin
  queryBuilder.where("contact_name","jafar").where("contact_number","09120000000").first() 
@@ -100,20 +108,24 @@ for AndWhere :
 for whereBetween:
  ```kotlin
  queryBuilder.whereBetween("id","0","2").first() // Where Between Query
+ whereBetween(Column Name String ,From String ,To String)
  ```
  for whereNotBetween:
  ```kotlin:
          queryBuilder.whereNotBetween("id","0","2").first() // Where Not Between Query
  ```
+ whereNotBetween(Column Name String ,From String ,To String)
  #### Order By / Sort
  for ordering rows and then get data you can use :
  ```kotlin
          queryBuilder.orderBy("id","ASC").first() // sort the result set based on id column in ASC order
 	 queryBuilder.orderBy("id","DESC").first() // sort the result set based on id column in DESC order
  ```
+ orderBy(Column Name String, Order Type (Default is DESC))
  #### Limit
  ```kotlin
  queryBuilder.limit(2).get() // limit
+ limit(Limit Count Int)
  ```
  #### Count Rows 
  for counting rows you can use count() function
