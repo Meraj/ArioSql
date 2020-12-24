@@ -62,6 +62,7 @@ bingo ,lets create some queries now
 * [insert](#Insert) -> insert data
 * [count](#count-rows) -> count rows
 * [exists / doesntExist](#existdoesnt-exist) -> check if a row exists or not
+* [paginate](#paginate) -> count rows
 
 
 #### Insert
@@ -172,6 +173,18 @@ for close the connection to the database :
 ```kotlin
 queryBuilder.close()
 ```
+
+#### Paginate
+```kotlin
+val paginate = queryBuilder.paginate(10) // paginate
+
+
+paginate.totalPages // Total Pages Int
+paginate.Rows // Cursor of indexes in current page
+paginate.currentPage // current page Int
+```
+paginate(Results Per Page Int ,Current Page Int = 1)
+paginate method return Paginate class 
 
 ### Cursor in Android
 ```kotlin
