@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
+import kotlin.math.ceil
 
 
 class QueryBuilder(private val context: Context, private var DATABASE_NAME: String) {
+
+
     private var db: SQLiteDatabase
 
     init {
@@ -152,7 +155,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         return this
     }
 
-    fun whereBetween(Selection: String, from: String, to: String): QueryBuilder {
+        fun whereBetween(Selection: String, from: String, to: String): QueryBuilder {
         var before = "WHERE"
         if (Where != "") {
             before = "AND"
@@ -210,7 +213,6 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
             return 0
         }
         val rowsCount: Int = cursor.count
-        db.close()
         QUERY = ""
         preparedStatements = ArrayList()
         cursor.close()
@@ -362,7 +364,29 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         db.endTransaction()
         return true
     }
-
+    // pagination
+    fun paginate(resultsPerPage:Int ,CurrentPage:Int = 1): Paginate {
+        val SavepreparedStatements = preparedStatements
+        val saveSelect = SELECT
+        val saveWhere = Where
+        val saveOrderByColumnName = OrderByColumnName
+        val saveORDER = ORDER
+        val totalRows = this.count()
+        preparedStatements = SavepreparedStatements
+        SELECT = saveSelect
+        Where = saveWhere
+        OrderByColumnName = saveOrderByColumnName
+        ORDER = saveORDER
+        val totalPages = ceil((totalRows/resultsPerPage).toDouble()).toInt()
+        val getFrom:Int = (CurrentPage -1) * resultsPerPage
+        this.limit(resultsPerPage,getFrom)
+        val rows = this.get()
+        return if(rows != null){
+            Paginate(totalPages,rows,CurrentPage)
+        }else{
+            Paginate(1,null,1)
+        }
+    }
     // Exist And does not exist
     fun exists(): Boolean {
         getQueryBuilder()
