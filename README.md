@@ -37,7 +37,7 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
                     .column("text_message","VARCHAR (255)") // table_two column
                 .init() // initialize Database
 ```
-
+---
 ## Build Queries
 you can use this library to create and run database queries in fluent way
 
@@ -51,6 +51,23 @@ after that we need to set table name that we are going to run queries for it
     dbHelper.table("table_one") // Set Table   
 ```
 bingo ,lets create some queries now 
+###### Queries :
+* [select](#select-columncolumns)
+* [where / orWhere / where Between / where Not Between](#use-where-query--search-in-table)
+* [limit](#limit)
+* [order by](#order-by--sort)
+* [first](#retrieving-a-single-row) // for get a single row (return Cursor)
+* [get](#get-all-rows-from-table) // for get rows (return Cursor)
+* [insert](#Insert) // insert data
+* [count](#count-rows) // count rows
+* [exists / doesntExist](existdoesnt-exist) // check if a row exists or not
+
+
+#### Insert
+for insert use :
+```kotlin
+        dbHelper.insert(arrayOf("contact_number","contact_name"), arrayOf("09120000000","Jafar")) // insert data
+```
 #### get All Rows From Table
 get function let you to retrieve the results of the query :
 ```kotlin
@@ -113,21 +130,6 @@ for searching in database for a row ,and check if its exist or not ,you can use 
         dbHelper.where("id","1").exists() // return true if exist
         dbHelper.where("id","1").doesntExist() // return true if DOES NOT exist
 ```
-
-###### Queries :
-* [select](#####Select-Column/Columns)
-* where
-* orWhere
-* whereBetween
-* whereNotBetween
-* limit
-* orderBy
-* first // for get a single row (return Cursor)
-* get // for get rows (return Cursor)
-* insert // insert data
-* count // count rows
-* exists // check if a row exist
-* doesntExist // check if a row does not exist
 
 
 ### Cursor in Android
