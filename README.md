@@ -111,12 +111,12 @@ for AndWhere :
 for whereBetween:
  ```kotlin
  queryBuilder.whereBetween("id","0","2").first() // Where Between Query
- whereBetween(Column Name String ,From String ,To String)
  ```
+  whereBetween(Column Name String ,From String ,To String)
  \
  for whereNotBetween:
  ```kotlin:
-         queryBuilder.whereNotBetween("id","0","2").first() // Where Not Between Query
+queryBuilder.whereNotBetween("id","0","2").first() // Where Not Between Query
  ```
  whereNotBetween(Column Name String ,From String ,To String)
  #### Order By / Sort
