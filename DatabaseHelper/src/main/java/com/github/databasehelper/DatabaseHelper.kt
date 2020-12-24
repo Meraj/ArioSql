@@ -17,6 +17,25 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
     private var preparedStatements :MutableList<String> = ArrayList()
     // Query
     private var QUERY :String = ""
+    private fun getQueryBuilder(){
+        if(SELECT == "*"){
+            QUERY = "SELECT $SELECT "
+        }else{
+            QUERY = SELECT
+        }
+        QUERY += "FROM $TABLE_NAME "
+        if(Where != ""){
+            QUERY += Where
+        }
+        if(OrderByColumnName != ""){
+           QUERY += "ORDER BY $OrderByColumnName $ORDER "  
+        }
+        
+        if(LimitQuery != ""){
+            QUERY = LimitQuery
+        }
+
+    }
     // Table
     private lateinit var TABLE_NAME :String
     fun table(TableName: String): DatabaseHelper {
@@ -25,50 +44,56 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
 
     }
     // Select
-    private var SELECT = "SELECT * "
+    private var SELECT = "*"
     fun select(Select: Array<String>): DatabaseHelper {
         SELECT = "SELECT "
         Select.forEach {
             SELECT += "$it,"
         }
-        QUERY += SELECT.substring(0, SELECT.length - 1) + " "
+        SELECT = SELECT.substring(0, SELECT.length - 1) + " "
         return this
     }
     fun select(Select: String): DatabaseHelper {
-        QUERY += "SELECT $Select"
+        SELECT = "SELECT $Select "
         return this
     }
     // Where
+    private var Where : String? = ""
     fun where(Selection: String, SelectionArg: String): DatabaseHelper {
-        QUERY = "where $Selection = ?"
+        Where = "where $Selection = ? "
         preparedStatements.add(SelectionArg)
         return this
     }
     fun whereRange(Selection: String, from: String ,to:String,Between: Boolean = true): DatabaseHelper {
+        var before = "where"
+        if(Where != ""){
+            before = "AND"
+        }
         if(Between){
-            QUERY = "where $Selection BETWEEN ? to ?"
+            Where += "$before $Selection BETWEEN ? to ? "
         }else{
-            QUERY = "where $Selection NOT BETWEEN ? to ?"
+            Where += "$before $Selection NOT BETWEEN ? to ? "
         }
         preparedStatements.add(from)
         preparedStatements.add(to)
         return this
     }
     fun andWhere(Selection: String, SelectionArg: String): DatabaseHelper {
-        QUERY += "AND $Selection = ?"
+        Where += "AND $Selection = ? "
         preparedStatements.add(SelectionArg)
         return this
     }
     fun orWhere(Selection: String, SelectionArg: String): DatabaseHelper {
-        QUERY += "OR $Selection = ?"
+        Where += "OR $Selection = ? "
         preparedStatements.add(SelectionArg)
         return this
     }
     // Limit And Offset
+    private var LimitQuery :String = ""
     fun limit(Limit:Int, Offset: Int = 0): DatabaseHelper {
-            QUERY += "LIMIT $Limit "
+        LimitQuery = "LIMIT $Limit "
         if(Offset != 0){
-            QUERY += "OFFSET $Offset "
+            LimitQuery += "OFFSET $Offset "
         }
         return this
     }
@@ -76,12 +101,16 @@ class DatabaseHelper(private val context: Context, private var DATABASE_NAME: St
     private var OrderByColumnName: String? = null
     private lateinit var ORDER:String
     fun orderBy(ColumnName: String,Order:String): DatabaseHelper {
-        QUERY += "ORDER BY $OrderByColumnName $ORDER "
+        OrderByColumnName = ColumnName
+        ORDER = Order
         return this
     }
     // First
     @SuppressLint("Recycle")
     fun first(): Cursor? {
+        if(QUERY == ""){
+            QUERY = "SELECT * FROM"
+        }
         val db:SQLiteDatabase = context.openOrCreateDatabase(
             DATABASE_NAME,
             Context.MODE_PRIVATE,
