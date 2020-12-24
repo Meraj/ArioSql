@@ -79,7 +79,7 @@ get() return Cursor
 #### Retrieving A Single Row
 first() function let you to retrieve the first index of the table :
 ```kotlin
-queryBuilder.first() // get All Rows
+queryBuilder.first() // get first Rows
 ```
 first() return Cursor
 #### Select Column/Columns
