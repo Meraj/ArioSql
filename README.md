@@ -98,7 +98,7 @@ select(Column Names Array)
 #### Use Where Query / Search in Table
 ```kotlin
 queryBuilder.where("contact_name","jafar").first() 
-queryBuilder.where("contact_name","LIKE,"%jafar%").first() 
+queryBuilder.where("contact_name","LIKE","%jafar%").first() 
 ```
 where(Column Name String, Value String) 
 where(Column Name String, Operator String, Value String) 
