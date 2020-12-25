@@ -28,11 +28,11 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
                 .version(1) // Database Version (For Upgrading Database in future)
                 .database("myNewDatabase") // Database Name
                 .table("table_one") // New Table
-                   .column("id","INTEGER PRIMARY KEY AUTOINCREMENT") // table_one column
+                   .column("id",CreateDatabase.PRIMARY_KEY) // table_one column
                    .column("contact_number","BIGINT (256)") // table_one column
                    .column("contact_name","VARCHAR (255)") // table_one column
                 .table("table_two") // New Table
-                    .column("id","INTEGER PRIMARY KEY AUTOINCREMENT") // table_two column
+                    .column("id",CreateDatabase.PRIMARY_KEY) // table_two column
                     .column("text_message","VARCHAR (255)") // table_two column
                 .init() // initialize Database
 ```
