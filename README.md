@@ -1,6 +1,6 @@
 # Android Query Builder
 this is a simple library that helps you to build databases and build queries in your java/kotlin project \
-[a simple to do app with this library](https://github.com/MerajV/androidToDoApp)
+[a simple to do app with this library](https://github.com/MerajV/AndroidBuildQuery-simpleToDoApp)
 ## install
 ##### step 1
 Add it in your root build.gradle at the end of repositories:
