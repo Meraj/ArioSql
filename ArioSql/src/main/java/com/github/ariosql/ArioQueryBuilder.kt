@@ -8,7 +8,7 @@ import android.util.Log
 import kotlin.math.ceil
 
 
-class QueryBuilder(private val context: Context, private var DATABASE_NAME: String) {
+class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: String) {
     companion object {
         val INSERT = 0
         val GET = 1
@@ -129,7 +129,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * set table name
      * @property TableName table name
      */
-    fun table(TableName: String): QueryBuilder {
+    fun table(TableName: String): ArioQueryBuilder {
         TABLE_NAME = TableName.replace("\\s".toRegex(), "_")
         return this
     }
@@ -145,7 +145,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun select(columnNames: Array<String>): QueryBuilder {
+    fun select(columnNames: Array<String>): ArioQueryBuilder {
         selectedColumns = ""
         columnNames.forEach {
             selectedColumns += "$it,"
@@ -161,7 +161,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun select(columnName: String): QueryBuilder {
+    fun select(columnName: String): ArioQueryBuilder {
         selectedColumns = columnName
         return this
     }
@@ -174,7 +174,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun andSelect(columnNames: Array<String>): QueryBuilder {
+    fun andSelect(columnNames: Array<String>): ArioQueryBuilder {
         selectedColumns += ","
         columnNames.forEach {
             selectedColumns += "$it,"
@@ -191,7 +191,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun andSelect(columnName: String): QueryBuilder {
+    fun andSelect(columnName: String): ArioQueryBuilder {
         selectedColumns += ",$columnName"
         return this
     }
@@ -224,7 +224,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun where(columnName: String, columnValue: String): QueryBuilder {
+    fun where(columnName: String, columnValue: String): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -244,7 +244,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun where(columnName: String, operation: String, columnValue: String): QueryBuilder {
+    fun where(columnName: String, operation: String, columnValue: String): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -261,7 +261,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun whereNull(columnName: String): QueryBuilder {
+    fun whereNull(columnName: String): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -277,7 +277,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun orWhereNull(columnName: String): QueryBuilder {
+    fun orWhereNull(columnName: String): ArioQueryBuilder {
         whereQueries = "OR $columnName IS NULL "
         return this
     }
@@ -289,7 +289,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun whereNotNull(columnName: String): QueryBuilder {
+    fun whereNotNull(columnName: String): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -305,7 +305,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun orWhereNotNull(columnName: String): QueryBuilder {
+    fun orWhereNotNull(columnName: String): ArioQueryBuilder {
         whereQueries = "OR $columnName IS NOT NULL "
         return this
     }
@@ -319,7 +319,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun whereBetween(columnName: String, from: String, to: String): QueryBuilder {
+    fun whereBetween(columnName: String, from: String, to: String): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -339,7 +339,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun whereNotBetween(columnName: String, from: String, to: String): QueryBuilder {
+    fun whereNotBetween(columnName: String, from: String, to: String): ArioQueryBuilder {
         var firstWhere = "where"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -360,7 +360,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun orWhere(columnName: String, columnValue: String): QueryBuilder {
+    fun orWhere(columnName: String, columnValue: String): ArioQueryBuilder {
         whereQueries += "OR $columnName = ? "
         preparedStatements.add(columnValue)
         return this
@@ -373,7 +373,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun whereRaw(sql:String, bindParamsValues: Array<String>? = null): QueryBuilder {
+    fun whereRaw(sql:String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
         var firstWhere = "WHERE"
         if (whereQueries != "") {
             firstWhere = "AND"
@@ -394,7 +394,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun orWhereRaw(sql:String, bindParamsValues: Array<String>? = null): QueryBuilder {
+    fun orWhereRaw(sql:String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
         whereQueries = "OR $sql "
         if(this.countMatches(sql,"?") != bindParamsValues?.size) {
             Log.w("QueryBuilder","check bind params again")
@@ -414,7 +414,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun limit(Limit: Int, Offset: Int = 0): QueryBuilder {
+    fun limit(Limit: Int, Offset: Int = 0): ArioQueryBuilder {
         limitQuery = "LIMIT $Limit "
         if (Offset != 0) {
             limitQuery += "OFFSET $Offset "
@@ -436,7 +436,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.1
      */
-    fun orderBy(columnName: String, Order: String = "DESC"): QueryBuilder {
+    fun orderBy(columnName: String, Order: String = "DESC"): ArioQueryBuilder {
         this.orderQuery = "ORDER BY $columnName $Order "
         return this
     }
@@ -452,7 +452,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun groupBy(columnName: String): QueryBuilder {
+    fun groupBy(columnName: String): ArioQueryBuilder {
         groupByQuery = "GROUP BY $columnName "
         return this
     }
@@ -461,7 +461,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @author MerajV
      * @since 0.3
      */
-    fun groupBy(columnNames: Array<String>): QueryBuilder {
+    fun groupBy(columnNames: Array<String>): ArioQueryBuilder {
         var columns = ""
         columnNames.forEach {
             columns += "$it,"
@@ -739,7 +739,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
      * @property resultsPerPage Int - Results Per Page
      * @property CurrentPage Int - Nullable Current Page
      */
-    fun paginate(resultsPerPage: Int, CurrentPage: Int = 1): Paginate {
+    fun paginate(resultsPerPage: Int, CurrentPage: Int = 1): ArioPaginate {
         val SavepreparedStatements = preparedStatements
          val saveSelect = selectedColumns
         val saveWhere = whereQueries
@@ -756,9 +756,9 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         this.limit(resultsPerPage, getFrom)
         val rows = this.get()
         return if (rows != null) {
-            Paginate(totalPages, rows, CurrentPage)
+            ArioPaginate(totalPages, rows, CurrentPage)
         } else {
-            Paginate(1, null, 1)
+            ArioPaginate(1, null, 1)
         }
     }
 

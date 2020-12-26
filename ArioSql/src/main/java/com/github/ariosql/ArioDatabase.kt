@@ -4,7 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 
 
-class CreateDatabase(private val context: Context) {
+class ArioDatabase(private val context: Context) {
     //
     companion object {
         val PRIMARY_KEY = "INTEGER PRIMARY KEY AUTOINCREMENT"
@@ -41,7 +41,7 @@ class CreateDatabase(private val context: Context) {
      * set Database Name
      * @property Name Database Name :String
      */
-    fun dbName(Name: String): CreateDatabase {
+    fun dbName(Name: String): ArioDatabase {
         DATABASE_NAME = Name
         if (!DATABASE_NAME.endsWith(".db")) {
             DATABASE_NAME += ".db";
@@ -53,7 +53,7 @@ class CreateDatabase(private val context: Context) {
      * set Database Version
      * @property Version Current Version: Int
      */
-    fun version(Version: Int): CreateDatabase {
+    fun version(Version: Int): ArioDatabase {
         DATABASE_VERSION = Version
         return this
     }
@@ -62,7 +62,7 @@ class CreateDatabase(private val context: Context) {
      * set Table Name
      * @property Name Table Name : String
      */
-    fun table(Name: String): CreateDatabase {
+    fun table(Name: String): ArioDatabase {
         if (COLUMNS != "") {
             this.save()
         }
@@ -74,7 +74,7 @@ class CreateDatabase(private val context: Context) {
      * add unique id column
      * each row will be get a unique id to define it
      */
-    fun id(): CreateDatabase {
+    fun id(): ArioDatabase {
         COLUMNS += "id $PRIMARY_KEY,"
         return this
     }
@@ -85,7 +85,7 @@ class CreateDatabase(private val context: Context) {
      * and manage theme automatically
      * the value of theme will be timestamp in millisecond
      */
-    fun timestamp(): CreateDatabase {
+    fun timestamp(): ArioDatabase {
         COLUMNS += "created_at BIGINT NULL,updated_at BIGINT NULL,"
         return this
     }
@@ -95,7 +95,7 @@ class CreateDatabase(private val context: Context) {
      * @property columnName column Name : String
      * @property DataType column Data Type : String
      */
-    fun column(columnName: String, DataType: String): CreateDatabase {
+    fun column(columnName: String, DataType: String): ArioDatabase {
         COLUMNS += "$columnName $DataType,"
         return this
     }
@@ -111,7 +111,7 @@ class CreateDatabase(private val context: Context) {
     /**
      * in upgrading the database will remove the table and recreate it
      */
-    fun justReCreateIt(): CreateDatabase {
+    fun justReCreateIt(): ArioDatabase {
         CustomOnUpgradeTabels.add("DROP TABLE IF EXISTS $TABLE_NAME")
      return this
     }
