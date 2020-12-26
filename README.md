@@ -19,4 +19,4 @@ dependencies {
 	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.27'
              }
 ```
-take a look at the [documentation](https://github.com/MerajV/AndroidQueryBuilder/wiki) here
+#### take a look at the [documentation](https://github.com/MerajV/AndroidQueryBuilder/wiki) here
