@@ -1,6 +1,6 @@
 # Android Query Builder
-this is a simple library that helps you to build databases and build queries in your java/kotlin project
-
+this is a simple library that helps you to build databases and build queries in your java/kotlin project \
+[a simple to do app with this library](https://github.com/MerajV/AndroidBuildQuery-simpleToDoApp)
 ## install
 ##### step 1
 Add it in your root build.gradle at the end of repositories:
@@ -15,7 +15,7 @@ allprojects {
 ##### step 2
 ```gradle
 dependencies {
-	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.26'
+	        implementation 'com.github.MerajV:AndroidQueryBuilder:0.27'
              }
 ```
 
@@ -28,11 +28,11 @@ for creating a database simply use CreateDatabase Class in your MainActivity, se
                 .version(1) // Database Version (For Upgrading Database in future)
                 .database("myNewDatabase") // Database Name
                 .table("table_one") // New Table
-                   .column("id","INTEGER PRIMARY KEY AUTOINCREMENT") // table_one column
+                   .column("id",CreateDatabase.PRIMARY_KEY) // table_one column
                    .column("contact_number","BIGINT (256)") // table_one column
                    .column("contact_name","VARCHAR (255)") // table_one column
                 .table("table_two") // New Table
-                    .column("id","INTEGER PRIMARY KEY AUTOINCREMENT") // table_two column
+                    .column("id",CreateDatabase.PRIMARY_KEY) // table_two column
                     .column("text_message","VARCHAR (255)") // table_two column
                 .init() // initialize Database
 ```
@@ -62,6 +62,7 @@ bingo ,lets create some queries now
 * [insert](#Insert) -> insert data
 * [count](#count-rows) -> count rows
 * [exists / doesntExist](#existdoesnt-exist) -> check if a row exists or not
+* [paginate](#paginate) -> pagination
 
 
 #### Insert
@@ -81,7 +82,7 @@ get() return Cursor
 #### Retrieving A Single Row
 first() function let you to retrieve the first index of the table :
 ```kotlin
-queryBuilder.first() // get first Rows
+queryBuilder.first() // get first Row
 ```
 first() return Cursor
 #### Select Column/Columns
@@ -97,7 +98,7 @@ select(Column Names Array)
 #### Use Where Query / Search in Table
 ```kotlin
 queryBuilder.where("contact_name","jafar").first() 
-queryBuilder.where("contact_name","LIKE,"%jafar%").first() 
+queryBuilder.where("contact_name","LIKE","%jafar%").first() 
 ```
 where(Column Name String, Value String) 
 where(Column Name String, Operator String, Value String) 
@@ -173,6 +174,21 @@ for close the connection to the database :
 queryBuilder.close()
 ```
 
+#### Paginate
+```kotlin
+val paginate = queryBuilder.paginate(10) // paginate
+
+
+paginate.totalPages // Total Pages Int
+paginate.Rows // Cursor of indexes in current page
+paginate.currentPage // current page Int
+```
+paginate(Results Per Page Int ,Current Page Int = 1) \
+paginate method return Paginate class \
+for get page insert page number like below :
+```kotlin
+val paginate = queryBuilder.paginate(10,2) // paginate
+```
 ### Cursor in Android
 ```kotlin
 val cursor = queryBuilder.get()

@@ -8,15 +8,12 @@ import kotlin.math.ceil
 
 
 class QueryBuilder(private val context: Context, private var DATABASE_NAME: String) {
-
-
-    private var db: SQLiteDatabase
-
+    private var db: SQLiteDatabase // SQLiteDatabase
     init {
         if (!DATABASE_NAME.endsWith(".db")) {
-            DATABASE_NAME += ".db";
+            DATABASE_NAME += ".db" // Add .db extension if user don`t add it
         }
-        DATABASE_NAME = DATABASE_NAME.replace(" ", "_")
+        DATABASE_NAME = DATABASE_NAME.replace("\\s".toRegex(), "_") // replace Spaces with _
         db = context.openOrCreateDatabase(
             DATABASE_NAME,
             Context.MODE_PRIVATE,
@@ -25,11 +22,11 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
     }
 
     //
-    private var CursorLists: MutableList<Cursor> = ArrayList()
+    private var cursorLists: MutableList<Cursor> = ArrayList() // list of cursors (to close theme in close() function)
     private var preparedStatements: MutableList<String> = ArrayList()
-
     // Query
-    private var QUERY: String = ""
+    private var QUERY: String = "" // Builded Query String
+    // a function to update get Query
     private fun getQueryBuilder() {
         if (SELECT == "*") {
             QUERY = "SELECT * "
@@ -51,7 +48,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         SELECT = "*"
         Where = ""
     }
-
+    // a function to update update query
     private fun updateQueryBuilder(columnNames: Array<String>) {
         QUERY = "UPDATE "
         QUERY += "$TABLE_NAME SET "
@@ -74,7 +71,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         SELECT = "*"
         Where = ""
     }
-
+    // a function to update delete query
     private fun deleteQueryBuilder() {
         QUERY = "DELETE "
 
@@ -93,14 +90,13 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         SELECT = "*"
         Where = ""
     }
-
     // Table
-    private lateinit var TABLE_NAME: String
+    private lateinit var TABLE_NAME: String // Table name
+    // set Table Name function
     fun table(TableName: String): QueryBuilder {
         TABLE_NAME = TableName
         return this
     }
-
     // Select
     private var SELECT = "*"
     private var selectColumns = ""
@@ -229,7 +225,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         QUERY = ""
         preparedStatements = ArrayList()
         return if (cursor != null && cursor.moveToFirst()) {
-            CursorLists.add(cursor)
+            cursorLists.add(cursor)
             cursor
         } else {
             cursor?.close()
@@ -243,34 +239,62 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         val cursor = db.rawQuery(QUERY, preparedStatements.toTypedArray())
         QUERY = ""
         preparedStatements = ArrayList()
-        CursorLists.add(cursor)
+        cursorLists.add(cursor)
         return cursor
     }
 
     // Insert
-    fun insert(ColumnName: Array<String>, ColumnData: Array<String>): Boolean {
+    /**
+    @return the row ID of the last row inserted, if this insert is successful. -1 otherwise.
+    **/
+    fun insert(ColumnName: Array<String>, ColumnData: Array<String>): Long {
+        return this.doInsert(ColumnName, ColumnData)
+    }
+    /**
+    @return the row ID of the last row inserted, if this insert is successful. -1 otherwise.
+     **/
+    fun insert(ColumnName: String, ColumnData: String): Long {
+       return this.doInsert(arrayOf(ColumnName), arrayOf(ColumnData))
+    }
+    private fun doInsert(ColumnNames: Array<String>, ColumnDatas: Array<String>): Long {
+        var newDatas :Array<String>
+        var newColumnNames :Array<String>
+        if (checkTimestamp()){
+            val newListWithTimestamp: MutableList<String> = ColumnNames.toMutableList()
+            newListWithTimestamp.add("updated_at")
+            newListWithTimestamp.add("created_at")
+            newColumnNames = newListWithTimestamp.toTypedArray()
+
+            val newColumnDatas: MutableList<String> = ColumnDatas.toMutableList()
+            newColumnDatas.add(System.currentTimeMillis().toString())
+            newColumnDatas.add(System.currentTimeMillis().toString())
+            newDatas = newColumnDatas.toTypedArray()
+        }else{
+            newColumnNames = ColumnNames
+            newDatas = ColumnDatas
+        }
         db.beginTransaction()
         QUERY = "INSERT INTO $TABLE_NAME ("
         var columns = ""
-        ColumnName.forEach {
+        newColumnNames.forEach {
             columns += "$it,"
         }
         columns = columns.substring(0, columns.length - 1)
         QUERY += "$columns) VALUES ("
-        var columndataString = ""
-        ColumnData.forEach {
-            columndataString += "?,"
+        var columnDataString = ""
+        newColumnNames.forEach {
+            columnDataString += "?,"
         }
-        columndataString = columndataString.substring(0, columndataString.length - 1)
-        QUERY += "$columndataString)"
+        columnDataString = columnDataString.substring(0, columnDataString.length - 1)
+        QUERY += "$columnDataString)"
         val stmt = db.compileStatement(QUERY)
         var forEachIndex = 1
-        ColumnData.forEach {
+        newDatas.forEach {
             stmt.bindString(forEachIndex, it)
             forEachIndex++
         }
 
-        stmt.executeInsert()
+        val insertedId =stmt.executeInsert()
         stmt.close()
         QUERY = ""
         preparedStatements = ArrayList()
@@ -278,15 +302,43 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
             db.setTransactionSuccessful()
         } catch (e: Exception) {
             db.endTransaction()
-            return false
+            return -1
         }
         db.endTransaction()
-        return true
+
+        return insertedId
+    }
+    // check for timestamp
+    @SuppressLint("Recycle")
+    private fun checkTimestamp(): Boolean {
+        val getTimestampColumns :Cursor
+        try {
+            getTimestampColumns = this.connection().rawQuery("SELECT created_at,updated_at FROM $TABLE_NAME",null)
+        }catch (e:Exception){
+            return false
+        }
+        return if(getTimestampColumns != null){
+            getTimestampColumns.moveToFirst()
+            val updatedAtColumn = getTimestampColumns.getColumnIndex("updated_at")
+            val createdAtColumn = getTimestampColumns.getColumnIndex("created_at")
+            !(updatedAtColumn == -1 && createdAtColumn == -1)
+        }else{
+            false
+        }
+    }
+    fun updateCreatedAt(rowId:Long,timestamp:Long? = null){
+        val createdAtTime : String = timestamp?.toString() ?: System.currentTimeMillis().toString()
+        this.where("id",rowId.toString()).update("created_at",createdAtTime)
     }
 
     // update
-    fun update(columnNames: String, new_values: String): Boolean {
-        updateQueryBuilder(arrayOf(columnNames))
+    fun update(columnName: String, new_values: String): Boolean {
+        if(checkTimestamp()){
+            updateQueryBuilder(arrayOf(columnName,"updated_at"))
+            preparedStatements.add(System.currentTimeMillis().toString())
+        }else{
+            updateQueryBuilder(arrayOf(columnName))
+        }
         db.beginTransaction()
         val stmt = db.compileStatement(QUERY)
         stmt.bindString(1, new_values)
@@ -312,11 +364,25 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
 
     @SuppressLint("Recycle")
     fun update(columnNames: Array<String>, new_values: Array<String>): Boolean {
-        updateQueryBuilder(columnNames)
+        var newValues :Array<String>
+        if(checkTimestamp()){
+            val newListWithUpdatedAt: MutableList<String> = columnNames.toMutableList()
+            newListWithUpdatedAt.add("updated_at")
+            val newColumnNames = newListWithUpdatedAt.toTypedArray()
+
+            val newListValuesUpdatedAt: MutableList<String> = new_values.toMutableList()
+            newListValuesUpdatedAt.add(System.currentTimeMillis().toString())
+            newValues = newListValuesUpdatedAt.toTypedArray()
+            updateQueryBuilder(newColumnNames)
+            preparedStatements.add(System.currentTimeMillis().toString())
+        }else{
+            updateQueryBuilder(columnNames)
+            newValues = new_values
+        }
         db.beginTransaction()
         val stmt = db.compileStatement(QUERY)
         var forEachIndex = 1
-        new_values.forEach {
+        newValues.forEach {
             stmt.bindString(forEachIndex, it)
             forEachIndex++
         }
@@ -338,7 +404,15 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         db.endTransaction()
         return true
     }
-
+    fun updateTime(timestamp: Long? = null){
+        var newTimestamp :String
+        if(timestamp == null){
+            newTimestamp = System.currentTimeMillis().toString()
+        }else{
+            newTimestamp = timestamp.toString()
+        }
+        this.update("updated_at",newTimestamp)
+    }
     //delete
     @SuppressLint("Recycle")
     fun delete(): Boolean {
@@ -397,8 +471,12 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
         getQueryBuilder()
         return this.count() == 0
     }
+    // Custom Query
 
     // Open And Close Connection
+    fun connection(): SQLiteDatabase {
+        return db
+    }
     fun open() {
         db = context.openOrCreateDatabase(
             DATABASE_NAME,
@@ -408,7 +486,7 @@ class QueryBuilder(private val context: Context, private var DATABASE_NAME: Stri
     }
 
     fun close() {
-        CursorLists.forEach {
+        cursorLists.forEach {
             it.close()
         }
         db.close()

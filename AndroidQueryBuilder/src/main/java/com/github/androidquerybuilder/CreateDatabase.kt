@@ -8,8 +8,26 @@ class CreateDatabase(private val context: Context) {
     //
     companion object {
         val PRIMARY_KEY = "INTEGER PRIMARY KEY AUTOINCREMENT"
-
+        val ID = "id"
+        val BLOB = "BLOB"
+        val BIGINT = "BIGINT"
+        val BOOLEAN = "BOOLEAN"
+        val CHAR = "CHAR"
+        val DATE = "DATE"
+        val DATETIME = "DATETIME"
+        val DECIMAL = "DECIMAL"
+        val DOUBLE = "DOUBLE"
+        val INTEGER = "INTEGER"
+        val INT = "INT"
+        val NONE = "NONE"
+        val NUMERIC = "NUMERIC"
+        val REAL = "REAL"
+        val STRING = "STRING"
+        val TEXT = "TEXT"
+        val TIME = "TIME"
+        val VARCHAR = "VARCHAR"
     }
+
     //
     private lateinit var TABLE_NAME: String
     private lateinit var DATABASE_NAME: String
@@ -24,7 +42,7 @@ class CreateDatabase(private val context: Context) {
         if (!DATABASE_NAME.endsWith(".db")) {
             DATABASE_NAME += ".db";
         }
-        DATABASE_NAME = DATABASE_NAME.replace(" ", "_");
+        DATABASE_NAME = DATABASE_NAME.replace("\\s".toRegex(), "_")
         return this
     }
 
@@ -38,6 +56,16 @@ class CreateDatabase(private val context: Context) {
             this.save()
         }
         TABLE_NAME = Name
+        return this
+    }
+
+    fun id(): CreateDatabase {
+        COLUMNS += "id $PRIMARY_KEY,"
+        return this
+    }
+
+    fun timestamp(): CreateDatabase {
+        COLUMNS += "created_at BIGINT NULL,updated_at BIGINT NULL,"
         return this
     }
 
@@ -60,9 +88,9 @@ class CreateDatabase(private val context: Context) {
     fun init() {
         this.save()
         db = context.openOrCreateDatabase(
-                DATABASE_NAME,
-                Context.MODE_PRIVATE,
-                null
+            DATABASE_NAME,
+            Context.MODE_PRIVATE,
+            null
         )
         val currentDatabaseVersion = db.version
         if (currentDatabaseVersion == DATABASE_VERSION || currentDatabaseVersion == 0) {
@@ -96,7 +124,7 @@ class CreateDatabase(private val context: Context) {
 
     fun isTableExists(tableName: String): Boolean {
         val query =
-                "select DISTINCT tbl_name from sqlite_master where tbl_name = '$tableName'"
+            "select DISTINCT tbl_name from sqlite_master where tbl_name = '$tableName'"
         db.rawQuery(query, null).use { cursor ->
             if (cursor != null) {
                 if (cursor.getCount() > 0) {
