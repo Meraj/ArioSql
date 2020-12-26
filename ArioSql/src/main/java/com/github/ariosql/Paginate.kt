@@ -1,4 +1,4 @@
-package com.github.androidquerybuilder
+package com.github.ariosql
 
 import android.database.Cursor
 

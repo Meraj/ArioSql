@@ -1,4 +1,4 @@
-package com.github.androidquerybuilder
+package com.github.ariosql
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -37,7 +37,11 @@ class CreateDatabase(private val context: Context) {
     private var CustomOnUpgradeTabels: MutableList<String> = ArrayList()
     private var OnUpgrade: MutableList<String> = ArrayList()
     private lateinit var db: SQLiteDatabase
-    fun database(Name: String): CreateDatabase {
+    /**
+     * set Database Name
+     * @property Name Database Name :String
+     */
+    fun dbName(Name: String): CreateDatabase {
         DATABASE_NAME = Name
         if (!DATABASE_NAME.endsWith(".db")) {
             DATABASE_NAME += ".db";
@@ -45,37 +49,71 @@ class CreateDatabase(private val context: Context) {
         DATABASE_NAME = DATABASE_NAME.replace("\\s".toRegex(), "_")
         return this
     }
-
+    /**
+     * set Database Version
+     * @property Version Current Version: Int
+     */
     fun version(Version: Int): CreateDatabase {
         DATABASE_VERSION = Version
         return this
     }
 
+    /**
+     * set Table Name
+     * @property Name Table Name : String
+     */
     fun table(Name: String): CreateDatabase {
         if (COLUMNS != "") {
             this.save()
         }
-        TABLE_NAME = Name
+        TABLE_NAME = Name.replace("\\s".toRegex(), "_")
         return this
     }
 
+    /**
+     * add unique id column
+     * each row will be get a unique id to define it
+     */
     fun id(): CreateDatabase {
         COLUMNS += "id $PRIMARY_KEY,"
         return this
     }
 
+    /**
+     * active timestamp feature for your table
+     * this feature automatically create 2 column -> created_at And updated_at
+     * and manage theme automatically
+     * the value of theme will be timestamp in millisecond
+     */
     fun timestamp(): CreateDatabase {
         COLUMNS += "created_at BIGINT NULL,updated_at BIGINT NULL,"
         return this
     }
 
-    fun column(Name: String, DataType: String): CreateDatabase {
-        COLUMNS += "$Name $DataType,"
+    /**
+     * add new column
+     * @property columnName column Name : String
+     * @property DataType column Data Type : String
+     */
+    fun column(columnName: String, DataType: String): CreateDatabase {
+        COLUMNS += "$columnName $DataType,"
         return this
     }
+    /**
+     * run a sql query when database version upgraded
+     * you can add multiple queries
+     * @property sql - String - Query
+     */
+    fun upgradeRaw(sql: String) {
+        CustomOnUpgradeTabels.add(sql)
+    }
 
-    fun onUpgrade(ConUpgrade: String) {
-        CustomOnUpgradeTabels.add(ConUpgrade)
+    /**
+     * in upgrading the database will remove the table and recreate it
+     */
+    fun justReCreateIt(): CreateDatabase {
+        CustomOnUpgradeTabels.add("DROP TABLE IF EXISTS $TABLE_NAME")
+     return this
     }
 
     private fun save() {
@@ -85,6 +123,9 @@ class CreateDatabase(private val context: Context) {
         COLUMNS = ""
     }
 
+    /**
+     * initialize the database
+     */
     fun init() {
         this.save()
         db = context.openOrCreateDatabase(
@@ -100,12 +141,13 @@ class CreateDatabase(private val context: Context) {
             }
         } else {
             if (CustomOnUpgradeTabels.size > 0) {
-                upgradeTables(db, OnUpgrade)
-                db.version = DATABASE_VERSION
-            } else {
-                upgradeTables(db, OnUpgrade)
+                upgradeTables(db, CustomOnUpgradeTabels)
                 db.version = DATABASE_VERSION
             }
+           /* else {
+                upgradeTables(db, OnUpgrade)
+                db.version = DATABASE_VERSION
+            }*/
         }
     }
 
@@ -122,7 +164,7 @@ class CreateDatabase(private val context: Context) {
         createTables(db)
     }
 
-    fun isTableExists(tableName: String): Boolean {
+    private fun isTableExists(tableName: String): Boolean {
         val query =
             "select DISTINCT tbl_name from sqlite_master where tbl_name = '$tableName'"
         db.rawQuery(query, null).use { cursor ->

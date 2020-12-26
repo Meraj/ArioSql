@@ -1,3 +1,0 @@
-include ':AndroidQueryBuilder'
-include ':app'
-rootProject.name = "DatabaseHelper"
