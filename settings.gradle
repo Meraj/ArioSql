@@ -1,3 +1,0 @@
-include ':ArioSql'
-include ':app'
-rootProject.name = "ArioSql"
