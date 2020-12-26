@@ -1,0 +1,3 @@
+include ':ArioSql'
+include ':app'
+rootProject.name = "ArioApp"
