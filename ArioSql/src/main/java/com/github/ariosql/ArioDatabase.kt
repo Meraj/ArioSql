@@ -33,9 +33,9 @@ class ArioDatabase(private val context: Context) {
     private lateinit var DATABASE_NAME: String
     private var DATABASE_VERSION: Int = 1
     private var COLUMNS: String = ""
-    private var OnCreateTabels: MutableList<String> = ArrayList()
-    private var CustomOnUpgradeTabels: MutableList<String> = ArrayList()
-    private var OnUpgrade: MutableList<String> = ArrayList()
+    private var onCreateTables: MutableList<String> = ArrayList()
+   // private var CustomOnUpgradeTabels: MutableList<String> = ArrayList()
+    private var onUpgrade: MutableList<String> = ArrayList()
     private lateinit var db: SQLiteDatabase
 
     /**
@@ -108,21 +108,20 @@ class ArioDatabase(private val context: Context) {
      * @property sql - String - Query
      */
     fun upgradeRaw(sql: String) {
-        CustomOnUpgradeTabels.add(sql)
+        onUpgrade.add(sql)
     }
 
     /**
      * in upgrading the database will remove the table and recreate it
      */
     fun justReCreateIt(): ArioDatabase {
-        CustomOnUpgradeTabels.add("DROP TABLE IF EXISTS $TABLE_NAME")
+        onUpgrade.add("DROP TABLE IF EXISTS $TABLE_NAME")
         return this
     }
 
     private fun save() {
         COLUMNS = COLUMNS.substring(0, COLUMNS.length - 1)
-        OnCreateTabels.add("CREATE TABLE IF NOT EXISTS $TABLE_NAME ($COLUMNS);")
-        OnUpgrade.add("DROP TABLE IF EXISTS $TABLE_NAME;")
+        onCreateTables.add("CREATE TABLE IF NOT EXISTS $TABLE_NAME ($COLUMNS);")
         COLUMNS = ""
     }
 
@@ -143,8 +142,8 @@ class ArioDatabase(private val context: Context) {
                 db.version = DATABASE_VERSION
             }
         } else {
-            if (CustomOnUpgradeTabels.size > 0) {
-                upgradeTables(db, CustomOnUpgradeTabels)
+            if (onUpgrade.size > 0) {
+                upgradeTables(db, onUpgrade)
                 db.version = DATABASE_VERSION
             }
             /* else {
@@ -155,7 +154,7 @@ class ArioDatabase(private val context: Context) {
     }
 
     private fun createTables(db: SQLiteDatabase) {
-        OnCreateTabels.forEach {
+        onCreateTables.forEach {
             db.execSQL(it)
         }
     }
