@@ -121,7 +121,7 @@ class ArioDatabase(private val context: Context) {
 
     private fun save() {
         COLUMNS = COLUMNS.substring(0, COLUMNS.length - 1)
-        OnCreateTabels.add("CREATE TABLE $TABLE_NAME ($COLUMNS);")
+        OnCreateTabels.add("CREATE TABLE IF NOT EXISTS $TABLE_NAME ($COLUMNS);")
         OnUpgrade.add("DROP TABLE IF EXISTS $TABLE_NAME;")
         COLUMNS = ""
     }
