@@ -1,4 +1,4 @@
-package com.github.arioapp
+package com.github.ariosqlexample
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
