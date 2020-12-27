@@ -14,6 +14,40 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         val GET = 1
         val UPDATE = 2
         val DELETE = 3
+        fun convertCursorToArray(cursor: Cursor): Array<Array<String>> {
+            val getColumnsCount :Int = cursor.columnCount
+            var cursorArray :Array<Array<String>> = arrayOf<Array<String>>()
+            var columns :Array<String> =  arrayOf<String>()
+            var indexes = 0
+            cursor.count
+            if(cursor.count != 0){
+                if(cursor.count == 1){
+                    cursor.moveToFirst()
+                    for (i in 0 until getColumnsCount step 1){
+                        val list: MutableList<String> = columns.toMutableList()
+                        list.add(cursor.getString(i))
+                        columns = list.toTypedArray()
+                    }
+                    val list: MutableList<Array<String>> = cursorArray.toMutableList()
+                    list.add(columns)
+                    cursorArray = list.toTypedArray()
+                }else{
+                    while (cursor.moveToNext()){
+                        for (i in 0 until getColumnsCount step 1){
+                            val list: MutableList<String> = columns.toMutableList()
+                            list.add(cursor.getString(i))
+                            columns = list.toTypedArray()
+                        }
+                        val list: MutableList<Array<String>> = cursorArray.toMutableList()
+                        list.add(columns)
+                        cursorArray = list.toTypedArray()
+                        columns = arrayOf()
+                        indexes++
+                    }
+                }
+            }
+            return cursorArray
+        }
     }
 
     private var db: SQLiteDatabase // SQLiteDatabase
@@ -31,8 +65,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     }
 
     //
-    private var cursorLists: MutableList<Cursor> =
-        ArrayList() // list of cursors (to close theme in close() function)
+
     private var preparedStatements: MutableList<String> = ArrayList()
     private fun resetPreparedStatements() {
         this.preparedStatements = ArrayList()
@@ -182,7 +215,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @author MerajV
      * @since 0.1
      */
-    fun andSelect(columnNames: Array<String>): ArioQueryBuilder {
+    fun addSelect(columnNames: Array<String>): ArioQueryBuilder {
         selectedColumns += ","
         columnNames.forEach {
             selectedColumns += "$it,"
@@ -199,7 +232,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @author MerajV
      * @since 0.1
      */
-    fun andSelect(columnName: String): ArioQueryBuilder {
+    fun addSelect(columnName: String): ArioQueryBuilder {
         selectedColumns += ",$columnName"
         return this
     }
@@ -211,7 +244,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @author MerajV
      * @since 0.3
      */
-    fun selectRaw(sql: String, bindParamsValues: Array<String>? = null) {
+    fun selectRaw(sql: String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
         selectRawQuery = sql
         if (this.countMatches(sql, "?") != bindParamsValues?.size) {
             Log.w("QueryBuilder", "check bind params again")
@@ -219,6 +252,29 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         bindParamsValues?.forEach {
             preparedStatements.add(it)
         }
+        return this
+    }
+
+    /**
+     * Select raw (custom query as select)
+     * @property sql - String
+     * @author MerajV
+     * @since 0.3.21
+     */
+    fun addSelectRaw(sql: String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
+        if(selectRawQuery != "*"){
+            selectRawQuery += ",$sql"
+        }else{
+            selectRawQuery = sql
+        }
+        if (this.countMatches(sql, "?") != bindParamsValues?.size) {
+            Log.w("QueryBuilder", "check bind params again")
+        }
+        bindParamsValues?.forEach {
+            preparedStatements.add(it)
+        }
+        return this
+
     }
 
     // Where
@@ -405,7 +461,21 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         preparedStatements.add(columnValue)
         return this
     }
-
+    /**
+     * use or statement in where
+     * @property columnName name of the column
+     * @property columnValue start from
+     * @sample orWhere("column_one","value two")
+     * @sample where("column_one","value one").orWhere("column_one","value two").orWhere("column_two","value three")
+     * @sample where("column_one","value one").orWhere("column_two","value two")
+     * @author MerajV
+     * @since 0.1
+     */
+    fun orWhere(columnName: String, operation: String, columnValue: String): ArioQueryBuilder {
+        whereQueries += "OR $columnName $operation ? "
+        preparedStatements.add(columnValue)
+        return this
+    }
     /**
      * Where raw (custom query as where)
      * @property sql - String
@@ -549,7 +619,6 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         val cursor = db.rawQuery(query, preparedStatements.toTypedArray())
         preparedStatements = ArrayList()
         return if (cursor != null) {
-            cursorLists.add(cursor)
             cursor.moveToFirst()
             cursor
         } else {
@@ -569,7 +638,6 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         lastExecutedQuery = query
         val cursor = db.rawQuery(query, preparedStatements.toTypedArray())
         preparedStatements = ArrayList()
-        cursorLists.add(cursor)
         return cursor
     }
 
@@ -889,9 +957,6 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun close() {
-        cursorLists.forEach {
-            it.close()
-        }
         db.close()
     }
 
@@ -903,37 +968,13 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @author MerajV
      * @since 0.3.12
      */
-    fun convertCursorToArray(cursor: Cursor): Array<Array<String>> {
-        val getColumnsCount :Int = cursor.columnCount
-        var cursorArray :Array<Array<String>> = arrayOf<Array<String>>()
-        var columns :Array<String> =  arrayOf<String>()
-        var indexes = 0
-        cursor.count
-        if(cursor.count != 0){
-            if(cursor.count == 1){
-                cursor.moveToFirst()
-                for (i in 0 until getColumnsCount step 1){
-                    columns = this.append(columns,cursor.getString(i))
-                }
-                val list: MutableList<Array<String>> = cursorArray.toMutableList()
-                list.add(columns)
-                cursorArray = list.toTypedArray()
-            }else{
-                while (cursor.moveToNext()){
-                    for (i in 0 until getColumnsCount step 1){
-                        columns = this.append(columns,cursor.getString(i))
-                    }
-                    val list: MutableList<Array<String>> = cursorArray.toMutableList()
-                    list.add(columns)
-                    cursorArray = list.toTypedArray()
-                    columns = arrayOf()
-                    indexes++
-                }
-            }
-        }
-        return cursorArray
-    }
 
+    /**
+     * this function just convert arrays to MutableList
+     * add new index
+     * convert to Array
+     * and return it
+     */
     private fun append(arr: Array<String>, element: String): Array<String> {
         val list: MutableList<String> = arr.toMutableList()
         list.add(element)
