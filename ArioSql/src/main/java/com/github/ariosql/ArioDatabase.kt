@@ -114,7 +114,7 @@ class ArioDatabase(private val context: Context) {
     /**
      * in upgrading the database will remove the table and recreate it
      */
-    fun justReCreateIt(): ArioDatabase {
+    fun inUpgradeReCreateIt(): ArioDatabase {
         onUpgrade.add("DROP TABLE IF EXISTS $TABLE_NAME")
         return this
     }
