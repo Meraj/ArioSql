@@ -51,31 +51,37 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     fun buildQuery(queryFunction: Int = 0): String {
         val query = StringBuilder() //Query String Builder
         if (queryFunction == 0) { // check if we want to insert new row or not
+            preparedStatements = ArrayList() // empty the preparedStatements Array (use preparedStatements to prevent SQLInjection )
+            preparedStatements.addAll(insertValues.toMutableList()) // add all column Values that user want to add to the row
             if (this.checkTimestamp()) { // check if user active timestamp feature
                 val currentTimestamp =
                     this.getCurrentTimestamp().toString()  // get Current Timestamp
-                preparedStatements =
-                    ArrayList() // empty the preparedStatements Array (use preparedStatements to prevent SQLInjection )
-                preparedStatements.addAll(insertValues.toMutableList()) // add all column Values that user want to add to the row
-                insertValues = this.append(
+                insertColumns = this.append(
                     insertColumns,
                     "created_at"
                 ) // add created_at column to add timestamp
-                insertValues = this.append(
+                insertColumns = this.append(
                     insertColumns,
                     "updated_at"
                 ) // add updated_at column to add timestamp
                 preparedStatements.add(currentTimestamp) // add timestamp
                 preparedStatements.add(currentTimestamp) // add timestamp
             }
+            var insertColumnsString = ""
+            insertColumns.forEach {
+                insertColumnsString += "$it,"
+            }
+            insertColumnsString = insertColumnsString.substring(0, insertColumnsString.length - 1)
             var bindParams = ""
             preparedStatements.forEach {
                 bindParams += "?,"
             }
-            bindParams = bindParams.substring(0, bindParams.length - 1)
-            query.append("INSERT INTO ").append(this.TABLE_NAME).append(" ($insertColumns) ")
+
+                bindParams = bindParams.substring(0, bindParams.length - 1)
+            query.append("INSERT INTO ").append(this.TABLE_NAME).append(" ($insertColumnsString) ")
                 .append("VALUES ").append("($bindParams)") // create insert into query
-        } else {
+        }
+        else {
             if (selectRawQuery != "") {
                 selectedColumns += ","
             }
@@ -96,7 +102,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
                     query.append(",updated_at = ${getCurrentTimestamp()}")
                 }
             }
-            selectedColumns = ""
+            selectedColumns = "*" // reset variable
             // Where queries
             query.append(this.whereQueries)
             this.whereQueries = ""
@@ -231,7 +237,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         if (whereQueries != "") {
             firstWhere = "AND"
         }
-        whereQueries = "$firstWhere $columnName = ? "
+        whereQueries += "$firstWhere $columnName = ? "
         preparedStatements.add(columnValue)
         return this
     }
@@ -251,7 +257,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         if (whereQueries != "") {
             firstWhere = "AND"
         }
-        whereQueries = "$firstWhere $columnName $operation ? "
+        whereQueries += "$firstWhere $columnName $operation ? "
         preparedStatements.add(columnValue)
         return this
     }
@@ -268,7 +274,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         if (whereQueries != "") {
             firstWhere = "AND"
         }
-        whereQueries = "$firstWhere $columnName IS NULL "
+        whereQueries += "$firstWhere $columnName IS NULL "
         return this
     }
 
@@ -280,7 +286,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun orWhereNull(columnName: String): ArioQueryBuilder {
-        whereQueries = "OR $columnName IS NULL "
+        whereQueries += "OR $columnName IS NULL "
         return this
     }
 
@@ -296,7 +302,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         if (whereQueries != "") {
             firstWhere = "AND"
         }
-        whereQueries = "$firstWhere $columnName IS NOT NULL "
+        whereQueries += "$firstWhere $columnName IS NOT NULL "
         return this
     }
 
@@ -308,7 +314,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun orWhereNotNull(columnName: String): ArioQueryBuilder {
-        whereQueries = "OR $columnName IS NOT NULL "
+        whereQueries += "OR $columnName IS NOT NULL "
         return this
     }
 
@@ -353,6 +359,38 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     }
 
     /**
+     * select rows between 2 value
+     * @property columnName name of the column
+     * @property from start from
+     * @property to until
+     * @sample orWhereBetween("column_one","5","10")
+     * @author MerajV
+     * @since 0.3.2
+     */
+    fun orWhereBetween(columnName: String, from: String, to: String): ArioQueryBuilder {
+        whereQueries += "OR $columnName BETWEEN ? AND ? "
+        preparedStatements.add(from)
+        preparedStatements.add(to)
+        return this
+    }
+
+    /**
+     * select rows that they aren`t between 2 value
+     * @property columnName name of the column
+     * @property from start from
+     * @property to until
+     * @sample orWhereNotBetween("column_one","5","10")
+     * @author MerajV
+     * @since 0.3.2
+     */
+    fun orWhereNotBetween(columnName: String, from: String, to: String): ArioQueryBuilder {
+        whereQueries += "OR $columnName NOT BETWEEN ? AND ? "
+        preparedStatements.add(from)
+        preparedStatements.add(to)
+        return this
+    }
+
+    /**
      * use or statement in where
      * @property columnName name of the column
      * @property columnValue start from
@@ -380,7 +418,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         if (whereQueries != "") {
             firstWhere = "AND"
         }
-        whereQueries = "$firstWhere $sql "
+        whereQueries += "$firstWhere $sql "
         if (this.countMatches(sql, "?") != bindParamsValues?.size) {
             Log.w("QueryBuilder", "check bind params again")
         }
@@ -398,7 +436,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun orWhereRaw(sql: String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
-        whereQueries = "OR $sql "
+        whereQueries += "OR $sql "
         if (this.countMatches(sql, "?") != bindParamsValues?.size) {
             Log.w("QueryBuilder", "check bind params again")
         }
@@ -446,7 +484,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     }
 
     fun orderByRaw(sql: String) {
-        //  this.orderQuery = "ORDER BY $columnName $Order "
+          this.orderQuery = "ORDER BY $sql "
     }
 
     // Group by
@@ -505,12 +543,14 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.1
      */
     fun first(): Cursor? {
+        this.limit(1)
         val query = buildQuery(GET)
         lastExecutedQuery = query
         val cursor = db.rawQuery(query, preparedStatements.toTypedArray())
         preparedStatements = ArrayList()
-        return if (cursor != null && cursor.moveToFirst()) {
+        return if (cursor != null) {
             cursorLists.add(cursor)
+            cursor.moveToFirst()
             cursor
         } else {
             cursor?.close()
@@ -698,12 +738,16 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     private fun checkTimestamp(): Boolean {
-        val getTimestampColumns: Cursor =
-            this.rawQuery("SELECT created_at,updated_at FROM $TABLE_NAME", null)!!
-        getTimestampColumns.moveToFirst()
-        val updatedAtColumn = getTimestampColumns.getColumnIndex("updated_at")
-        val createdAtColumn = getTimestampColumns.getColumnIndex("created_at")
-        return !(updatedAtColumn == -1 && createdAtColumn == -1)
+        val getTimestampColumns = this.rawQuery("SELECT created_at,updated_at FROM $TABLE_NAME", null)
+        if(getTimestampColumns != null){
+            getTimestampColumns.moveToFirst()
+            val updatedAtColumn = getTimestampColumns.getColumnIndex("updated_at")
+            val createdAtColumn = getTimestampColumns.getColumnIndex("created_at")
+            return !(updatedAtColumn == -1 && createdAtColumn == -1)
+        }else{
+            return false
+        }
+
     }
 
     /**
@@ -849,6 +893,45 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
             it.close()
         }
         db.close()
+    }
+
+    /**
+     * a simple function that convert cursors to String Array
+     *
+     * @property cursor Cursor
+     * @return Array<Array<String>>
+     * @author MerajV
+     * @since 0.3.12
+     */
+    fun convertCursorToArray(cursor: Cursor): Array<Array<String>> {
+        val getColumnsCount :Int = cursor.columnCount
+        var cursorArray :Array<Array<String>> = arrayOf<Array<String>>()
+        var columns :Array<String> =  arrayOf<String>()
+        var indexes = 0
+        cursor.count
+        if(cursor.count != 0){
+            if(cursor.count == 1){
+                cursor.moveToFirst()
+                for (i in 0 until getColumnsCount step 1){
+                    columns = this.append(columns,cursor.getString(i))
+                }
+                val list: MutableList<Array<String>> = cursorArray.toMutableList()
+                list.add(columns)
+                cursorArray = list.toTypedArray()
+            }else{
+                while (cursor.moveToNext()){
+                    for (i in 0 until getColumnsCount step 1){
+                        columns = this.append(columns,cursor.getString(i))
+                    }
+                    val list: MutableList<Array<String>> = cursorArray.toMutableList()
+                    list.add(columns)
+                    cursorArray = list.toTypedArray()
+                    columns = arrayOf()
+                    indexes++
+                }
+            }
+        }
+        return cursorArray
     }
 
     private fun append(arr: Array<String>, element: String): Array<String> {
