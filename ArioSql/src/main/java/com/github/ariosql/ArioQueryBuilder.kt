@@ -561,7 +561,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     private var groupByQuery = ""
 
     /**
-     * group by (NOT READY)
+     * group by
      * @author MerajV
      * @since 0.3
      */
@@ -571,7 +571,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     }
 
     /**
-     * group by (NOT READY)
+     * group by
      * @author MerajV
      * @since 0.3
      */
