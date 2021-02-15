@@ -82,6 +82,9 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun buildQuery(queryFunction: Int = 0): String {
+        if(selectedColumns.isEmpty()){
+            selectedColumns = "*"
+        }
         val query = StringBuilder() //Query String Builder
         if (queryFunction == 0) { // check if we want to insert new row or not
             preparedStatements = ArrayList() // empty the preparedStatements Array (use preparedStatements to prevent SQLInjection )
@@ -115,11 +118,8 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
                 .append("VALUES ").append("($bindParams)") // create insert into query
         }
         else {
-            if (selectRawQuery != "") {
-                selectedColumns += ","
-            }
             when (queryFunction) { // check for selected query EXPECT insert
-                1 -> query.append("SELECT $selectedColumns ").append(selectRawQuery)
+                1 -> query.append("SELECT $selectedColumns ")
                     .append("FROM $TABLE_NAME ")
                 2 -> query.append("UPDATE $TABLE_NAME SET ")
                 3 -> query.append("DELETE ").append("FROM $TABLE_NAME ")
@@ -135,7 +135,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
                     query.append(",updated_at = ${getCurrentTimestamp()}")
                 }
             }
-            selectedColumns = "*" // reset variable
+            selectedColumns = "" // reset variable
             // Where queries
             query.append(this.whereQueries)
             this.whereQueries = ""
@@ -176,7 +176,6 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
 
     // Select Queries
     private var selectedColumns = "*"
-    private var selectRawQuery: String = ""
 
     /**
      * build select statement
@@ -245,7 +244,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3
      */
     fun selectRaw(sql: String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
-        selectRawQuery = sql
+        selectedColumns = sql
         if (this.countMatches(sql, "?") != bindParamsValues?.size) {
             Log.w("QueryBuilder", "check bind params again")
         }
@@ -262,10 +261,10 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
      * @since 0.3.21
      */
     fun addSelectRaw(sql: String, bindParamsValues: Array<String>? = null): ArioQueryBuilder {
-        if(selectRawQuery != "*"){
-            selectRawQuery += ",$sql"
+        if(selectedColumns.isNotEmpty()){
+            selectedColumns += ",$sql"
         }else{
-            selectRawQuery = sql
+            selectedColumns = sql
         }
         if (this.countMatches(sql, "?") != bindParamsValues?.size) {
             Log.w("QueryBuilder", "check bind params again")
@@ -275,6 +274,33 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         }
         return this
 
+    }
+
+    /**
+     * select columns with unique value
+     * @param columnName string
+     * @author Meraj
+     * @since 0.3.3
+     */
+    fun selectDistinct(columnName: String): ArioQueryBuilder {
+        selectedColumns = "DISTINCT $columnName"
+        return this
+    }
+
+    /**
+     * select columns with unique value
+     * @param columnName string array
+     * @author Meraj
+     * @since 0.3.3
+     */
+    fun selectDistinct(columnNames: Array<String>): ArioQueryBuilder {
+        var columns = ""
+        columnNames.forEach {
+            columns += "$it,"
+        }
+        columns.substring(0,columns.length - 1);
+        selectedColumns = "DISTINCT $columns"
+        return this
     }
 
     // Where
@@ -461,6 +487,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         preparedStatements.add(columnValue)
         return this
     }
+
     /**
      * use or statement in where
      * @property columnName name of the column
@@ -476,6 +503,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         preparedStatements.add(columnValue)
         return this
     }
+
     /**
      * Where raw (custom query as where)
      * @property sql - String
