@@ -14,6 +14,15 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         val GET = 1
         val UPDATE = 2
         val DELETE = 3
+
+        /**
+         * a simple function that convert cursors to String Array
+         *
+         * @property cursor Cursor
+         * @return Array<Array<String>>
+         * @author MerajV
+         * @since 0.3.12
+         */
         fun convertCursorToArray(cursor: Cursor): Array<Array<String>> {
             val getColumnsCount :Int = cursor.columnCount
             var cursorArray :Array<Array<String>> = arrayOf<Array<String>>()
@@ -120,7 +129,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         else {
             when (queryFunction) { // check for selected query EXPECT insert
                 1 -> query.append("SELECT $selectedColumns ")
-                    .append("FROM $TABLE_NAME ")
+                    .append("FROM $TABLE_NAME ").append(join)
                 2 -> query.append("UPDATE $TABLE_NAME SET ")
                 3 -> query.append("DELETE ").append("FROM $TABLE_NAME ")
             }
@@ -136,6 +145,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
                 }
             }
             selectedColumns = "" // reset variable
+            join = "" // reset variable
             // Where queries
             query.append(this.whereQueries)
             this.whereQueries = ""
@@ -148,7 +158,7 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
             query.append(this.limitQuery)
             this.limitQuery = ""
         }
-        // return builded query
+        // return built query
         return query.toString()
     }
 
@@ -613,6 +623,63 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
         return this
     }
 
+    var join :String = ""
+
+    /**
+     * inner join sql statement
+     * @param table string
+     * @param table_column_left string
+     * @param table_column_right string
+     * @author Meraj
+     * @since 0.3.3
+     * @sample innerJoin("persons","persons.id","Customers.person_id")
+     */
+    fun innerJoin(table :String,table_column_left:String,table_column_right:String): ArioQueryBuilder {
+        join = " INNER JOIN $table ON $table_column_left=$table_column_right "
+        return this
+    }
+    
+    /**
+     * left join sql statement
+     * @param table string
+     * @param table_column_left string
+     * @param table_column_right string
+     * @author Meraj
+     * @since 0.3.3
+     * @sample leftJoin("persons","persons.id","Customers.person_id")
+     */
+    fun leftJoin(table :String,table_column_left:String,table_column_right:String): ArioQueryBuilder {
+        join = " LEFT JOIN $table ON $table_column_left=$table_column_right "
+        return this
+    }
+
+    /**
+     * right join sql statement
+     * @param table string
+     * @param table_column_left string
+     * @param table_column_right string
+     * @author Meraj
+     * @since 0.3.3
+     * @sample rightJoin("persons","persons.id","Customers.person_id")
+     */
+    fun rightJoin(table :String,table_column_left:String,table_column_right:String): ArioQueryBuilder {
+        join = " RIGHT JOIN $table ON $table_column_left=$table_column_right "
+        return this
+    }
+
+    /**
+     * full join sql statement
+     * @param table string
+     * @param table_column_left string
+     * @param table_column_right string
+     * @author Meraj
+     * @since 0.3.3
+     * @sample fullJoin("persons","persons.id","Customers.person_id")
+     */
+    fun fullJoin(table :String,table_column_left:String,table_column_right:String): ArioQueryBuilder {
+        join = " FULL JOIN $table ON $table_column_left=$table_column_right "
+        return this
+    }
     /**
      * count rows
      * @return Int - cont rows and return Int
@@ -987,15 +1054,6 @@ class ArioQueryBuilder(private val context: Context, private var DATABASE_NAME: 
     fun close() {
         db.close()
     }
-
-    /**
-     * a simple function that convert cursors to String Array
-     *
-     * @property cursor Cursor
-     * @return Array<Array<String>>
-     * @author MerajV
-     * @since 0.3.12
-     */
 
     /**
      * this function just convert arrays to MutableList
