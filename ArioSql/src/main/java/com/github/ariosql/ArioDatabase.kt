@@ -107,8 +107,9 @@ class ArioDatabase(private val context: Context) {
      * you can add multiple queries
      * @property sql - String - Query
      */
-    fun upgradeRaw(sql: String) {
+    fun upgradeRaw(sql: String): ArioDatabase {
         onUpgrade.add(sql)
+        return this
     }
 
     /**
